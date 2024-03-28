@@ -16,9 +16,9 @@ def check_field_types(json_file_path, expected_fields):
         for field, expected_type in expected_fields.items():
             if field not in movie or movie[field] is None:
                 print(f'Expected field {field} not found in movie {movie["id"]}')
-            else:
+            else:    
                 if expected_type is not None:
-                    if expected_type == str:
+                    if expected_type == str:    
                         assert isinstance(
                             movie[field], expected_type
                         ), f'Expected field {field} to be of type {expected_type}, but got {type(movie[field])} in movie {movie["id"]}'
