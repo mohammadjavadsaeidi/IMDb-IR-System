@@ -263,4 +263,58 @@ class Index:
             print('Indexing is wrong')
             return False
 
+    def check_add_remove_is_correct(self):
+        """
+        Check if the add and remove is correct
+        """
+
+        dummy_document = {
+            'id': '100',
+            'stars': ['tim', 'henry'],
+            'genres': ['drama', 'crime'],
+            'summaries': ['good']
+        }
+
+        index_before_add = copy.deepcopy(self.index)
+        self.add_document_to_index(dummy_document)
+        index_after_add = copy.deepcopy(self.index)
+
+        if index_after_add[Indexes.DOCUMENTS.value]['100'] != dummy_document:
+            print('Add is incorrect, document')
+            return
+
+        if (set(index_after_add[Indexes.STARS.value]['tim']).difference(set(index_before_add[Indexes.STARS.value]['tim']))
+                != {dummy_document['id']}):
+            print('Add is incorrect, tim')
+            return
+
+        if (set(index_after_add[Indexes.STARS.value]['henry']).difference(set(index_before_add[Indexes.STARS.value]['henry']))
+                != {dummy_document['id']}):
+            print('Add is incorrect, henry')
+            return
+        if (set(index_after_add[Indexes.GENRES.value]['drama']).difference(set(index_before_add[Indexes.GENRES.value]['drama']))
+                != {dummy_document['id']}):
+            print('Add is incorrect, drama')
+            return
+
+        if (set(index_after_add[Indexes.GENRES.value]['crime']).difference(set(index_before_add[Indexes.GENRES.value]['crime']))
+                != {dummy_document['id']}):
+            print('Add is incorrect, crime')
+            return
+
+        if (set(index_after_add[Indexes.SUMMARIES.value]['good']).difference(set(index_before_add[Indexes.SUMMARIES.value]['good']))
+                != {dummy_document['id']}):
+            print('Add is incorrect, good')
+            return
+
+        print('Add is correct')
+
+        self.remove_document_from_index('100')
+        index_after_remove = copy.deepcopy(self.index)
+
+        if index_after_remove == index_before_add:
+            print('Remove is correct')
+        else:
+            print('Remove is incorrect')
+
 # TODO: Run the class with needed parameters, then run check methods and finally report the results of check methods
