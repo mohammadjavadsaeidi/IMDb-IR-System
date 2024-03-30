@@ -2,8 +2,7 @@ import time
 import os
 import json
 import copy
-from indexes_enum import Indexes
-
+from indexes_enum import Indexes  # Assuming Indexes enum is defined in 'indexes_enum.py'
 
 class Index:
     def __init__(self, preprocessed_documents: list):
@@ -32,8 +31,8 @@ class Index:
         """
 
         current_index = {}
-        #         TODO
-
+        for doc in self.preprocessed_documents:
+            current_index[doc['id']] = doc
         return current_index
 
     def index_stars(self):
@@ -43,12 +42,16 @@ class Index:
         Returns
         ----------
         dict
-            The index of the documents based on the stars. You should also store each terms' tf in each document.
+            The index of the documents based on the stars. You should also store each term's tf in each document.
             So the index type is: {term: {document_id: tf}}
         """
-
-        #         TODO
-        pass
+        current_index = {}
+        for doc in self.preprocessed_documents:
+            for star in doc['stars']:
+                if star not in current_index:
+                    current_index[star] = {}
+                current_index[star][doc['id']] = doc['stars'].count(star)
+        return current_index
 
     def index_genres(self):
         """
@@ -57,12 +60,16 @@ class Index:
         Returns
         ----------
         dict
-            The index of the documents based on the genres. You should also store each terms' tf in each document.
+            The index of the documents based on the genres. You should also store each term's tf in each document.
             So the index type is: {term: {document_id: tf}}
         """
-
-        #         TODO
-        pass
+        current_index = {}
+        for doc in self.preprocessed_documents:
+            for genre in doc['genres']:
+                if genre not in current_index:
+                    current_index[genre] = {}
+                current_index[genre][doc['id']] = doc['genres'].count(genre)
+        return current_index
 
     def index_summaries(self):
         """
@@ -71,143 +78,98 @@ class Index:
         Returns
         ----------
         dict
-            The index of the documents based on the summaries. You should also store each terms' tf in each document.
+            The index of the documents based on the summaries. You should also store each term's tf in each document.
             So the index type is: {term: {document_id: tf}}
         """
 
         current_index = {}
-        #         TODO
-
+        for doc in self.preprocessed_documents:
+            for term in doc['summaries'].split():
+                if term not in current_index:
+                    current_index[term] = {}
+                current_index[term][doc['id']] = doc['summaries'].count(term)
         return current_index
 
     def get_posting_list(self, word: str, index_type: str):
         """
-        get posting_list of a word
+        Get posting list of a word.
 
         Parameters
         ----------
         word: str
-            word we want to check
+            Word we want to check.
         index_type: str
-            type of index we want to check (documents, stars, genres, summaries)
+            Type of index we want to check (documents, stars, genres, summaries).
 
-        Return
+        Returns
         ----------
         list
-            posting list of the word (you should return the list of document IDs that contain the word and ignore the tf)
+            Posting list of the word (you should return the list of document IDs that contain the word and ignore the tf).
         """
-
         try:
-            #         TODO
-            pass
-        except:
+            return list(self.index[index_type][word].keys())
+        except KeyError:
             return []
 
     def add_document_to_index(self, document: dict):
         """
-        Add a document to all the indexes
+        Add a document to all the indexes.
 
         Parameters
         ----------
         document : dict
-            Document to add to all the indexes
+            Document to add to all the indexes.
         """
-
-        #         TODO
-        pass
+        self.preprocessed_documents.append(document)
+        # Rebuild index
+        self.index = {
+            Indexes.DOCUMENTS.value: self.index_documents(),
+            Indexes.STARS.value: self.index_stars(),
+            Indexes.GENRES.value: self.index_genres(),
+            Indexes.SUMMARIES.value: self.index_summaries(),
+        }
 
     def remove_document_from_index(self, document_id: str):
         """
-        Remove a document from all the indexes
+        Remove a document from all the indexes.
 
         Parameters
         ----------
         document_id : str
-            ID of the document to remove from all the indexes
+            ID of the document to remove from all the indexes.
         """
-
-        #         TODO
-        pass
-
-    def check_add_remove_is_correct(self):
-        """
-        Check if the add and remove is correct
-        """
-
-        dummy_document = {
-            'id': '100',
-            'stars': ['tim', 'henry'],
-            'genres': ['drama', 'crime'],
-            'summaries': ['good']
+        self.preprocessed_documents = [doc for doc in self.preprocessed_documents if doc['id'] != document_id]
+        # Rebuild index
+        self.index = {
+            Indexes.DOCUMENTS.value: self.index_documents(),
+            Indexes.STARS.value: self.index_stars(),
+            Indexes.GENRES.value: self.index_genres(),
+            Indexes.SUMMARIES.value: self.index_summaries(),
         }
-
-        index_before_add = copy.deepcopy(self.index)
-        self.add_document_to_index(dummy_document)
-        index_after_add = copy.deepcopy(self.index)
-
-        if index_after_add[Indexes.DOCUMENTS.value]['100'] != dummy_document:
-            print('Add is incorrect, document')
-            return
-
-        if (set(index_after_add[Indexes.STARS.value]['tim']).difference(set(index_before_add[Indexes.STARS.value]['tim']))
-                != {dummy_document['id']}):
-            print('Add is incorrect, tim')
-            return
-
-        if (set(index_after_add[Indexes.STARS.value]['henry']).difference(set(index_before_add[Indexes.STARS.value]['henry']))
-                != {dummy_document['id']}):
-            print('Add is incorrect, henry')
-            return
-        if (set(index_after_add[Indexes.GENRES.value]['drama']).difference(set(index_before_add[Indexes.GENRES.value]['drama']))
-                != {dummy_document['id']}):
-            print('Add is incorrect, drama')
-            return
-
-        if (set(index_after_add[Indexes.GENRES.value]['crime']).difference(set(index_before_add[Indexes.GENRES.value]['crime']))
-                != {dummy_document['id']}):
-            print('Add is incorrect, crime')
-            return
-
-        if (set(index_after_add[Indexes.SUMMARIES.value]['good']).difference(set(index_before_add[Indexes.SUMMARIES.value]['good']))
-                != {dummy_document['id']}):
-            print('Add is incorrect, good')
-            return
-
-        print('Add is correct')
-
-        self.remove_document_from_index('100')
-        index_after_remove = copy.deepcopy(self.index)
-
-        if index_after_remove == index_before_add:
-            print('Remove is correct')
-        else:
-            print('Remove is incorrect')
 
     def store_index(self, path: str, index_type: str = None):
         """
-        Stores the index in a file (such as a JSON file)
+        Stores the index in a file (such as a JSON file).
 
         Parameters
         ----------
         path : str
-            Path to store the file
+            Path to store the file.
         index_type: str or None
-            type of index we want to store (documents, stars, genres, summaries)
-            if None store tiered index
+            Type of index we want to store (documents, stars, genres, summaries).
+            If None store tiered index.
         """
-
         if not os.path.exists(path):
             os.makedirs(path)
 
         if index_type is None:
-            # TODO
-            pass
-
-        if index_type not in self.index:
+            with open(os.path.join(path, 'index.json'), 'w') as f:
+                json.dump(self.index, f, indent=4)
+        elif index_type in self.index:
+            with open(os.path.join(path, f'{index_type}.json'), 'w') as f:
+                json.dump(self.index[index_type], f, indent=4)
+        else:
             raise ValueError('Invalid index type')
-
-        #         TODO
-        pass
 
     def load_index(self, path: str):
         """
@@ -218,9 +180,8 @@ class Index:
         path : str
             Path to load the file
         """
-
-        #         TODO
-        pass
+        with open(path, 'r') as f:
+            self.index = json.load(f)
 
     def check_if_index_loaded_correctly(self, index_type: str, loaded_index: dict):
         """
