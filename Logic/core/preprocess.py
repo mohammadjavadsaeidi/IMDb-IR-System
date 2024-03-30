@@ -29,8 +29,9 @@ class Preprocessor:
         """
         preprocessed_documents = []
         for doc in self.documents:
-            doc = self.normalize(doc)
+            doc = self.remove_stopwords(doc)
             doc = self.remove_links(doc)
+            doc = self.normalize(doc)
             doc = self.remove_punctuations(doc)
             preprocessed_documents.append(doc)
 
