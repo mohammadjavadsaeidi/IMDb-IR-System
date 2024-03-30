@@ -1,3 +1,7 @@
+import string
+import re
+from nltk.tokenize import word_tokenize
+from nltk.stem import PorterStemmer, WordNetLemmatizer
 
 
 class Preprocessor:
@@ -11,9 +15,8 @@ class Preprocessor:
         documents : list
             The list of documents to be preprocessed, path to stop words, or other parameters.
         """
-        # TODO
         self.documents = documents
-        self.stopwords = []
+        self.stopwords = load_stopwords()
 
     def preprocess(self):
         """
@@ -24,8 +27,14 @@ class Preprocessor:
         List[str]
             The preprocessed documents.
         """
-         # TODO
-        return
+        preprocessed_documents = []
+        for doc in self.documents:
+            doc = self.normalize(doc)
+            doc = self.remove_links(doc)
+            doc = self.remove_punctuations(doc)
+            preprocessed_documents.append(doc)
+
+        return preprocessed_documents
 
     def normalize(self, text: str):
         """
@@ -41,8 +50,13 @@ class Preprocessor:
         str
             The normalized text.
         """
-        # TODO
-        return
+        wordnet_lemmatizer = WordNetLemmatizer()
+        stemmer = PorterStemmer()
+
+        text = text.lower()
+        text = ''.join([wordnet_lemmatizer.lemmatize(work.lower()) for work in self.tokenize(text)])
+        text = ''.join([stemmer.stem(word) for word in self.tokenize(text)])
+        return text
 
     def remove_links(self, text: str):
         """
@@ -59,8 +73,9 @@ class Preprocessor:
             The text with links removed.
         """
         patterns = [r'\S*http\S*', r'\S*www\S*', r'\S+\.ir\S*', r'\S+\.com\S*', r'\S+\.org\S*', r'\S*@\S*']
-        # TODO
-        return
+        for pattern in patterns:
+            text = re.sub(pattern, '', text)
+        return text
 
     def remove_punctuations(self, text: str):
         """
@@ -76,8 +91,8 @@ class Preprocessor:
         str
             The text with punctuations removed.
         """
-        # TODO
-        return
+        translator = str.maketrans(dict.fromkeys(list(string.punctuation)))
+        return text.translate(translator)
 
     def tokenize(self, text: str):
         """
@@ -93,8 +108,7 @@ class Preprocessor:
         list
             The list of words.
         """
-        # TODO
-        return
+        return word_tokenize(text)
 
     def remove_stopwords(self, text: str):
         """
@@ -110,6 +124,17 @@ class Preprocessor:
         list
             The list of words with stopwords removed.
         """
-        # TODO
-        return
+        return ' '.join([word for word in self.tokenize(text) if word.lower() not in self.stopwords])
 
+
+def load_stopwords():
+    """
+        Load stopwords from a file.
+
+        Returns
+        ----------
+        set
+            A set of stopwords.
+        """
+    with open("../core/stopwords.txt", 'r') as file:
+        return file.read().splitlines()
