@@ -7,6 +7,7 @@ class Indexes(Enum):
     GENRES = 'genres'
     SUMMARIES = 'summaries'
 
+
 class Index_types(Enum):
     TIERED = 'tiered'
     DOCUMENT_LENGTH = 'document_length'
