@@ -17,6 +17,8 @@ class Preprocessor:
         """
         self.documents = documents
         self.stopwords = load_stopwords()
+        self.lemmatizer = WordNetLemmatizer()
+        self.stemmer = PorterStemmer()
 
     def preprocess(self):
         """
@@ -51,12 +53,10 @@ class Preprocessor:
         str
             The normalized text.
         """
-        wordnet_lemmatizer = WordNetLemmatizer()
-        stemmer = PorterStemmer()
 
         text = text.lower()
-        text = ''.join([wordnet_lemmatizer.lemmatize(work.lower()) for work in self.tokenize(text)])
-        text = ''.join([stemmer.stem(word) for word in self.tokenize(text)])
+        text = ''.join([self.lemmatizer.lemmatize(work.lower()) for work in self.tokenize(text)])
+        text = ''.join([self.stemmer.stem(word) for word in self.tokenize(text)])
         return text
 
     def remove_links(self, text: str):
