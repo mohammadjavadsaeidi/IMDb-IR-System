@@ -50,9 +50,10 @@ class Index:
         current_index = {}
         for doc in self.preprocessed_documents:
             for star in doc['stars']:
-                if star not in current_index:
-                    current_index[star] = {}
-                current_index[star][doc['id']] = doc['stars'].count(star)
+                for term in star.split():
+                    if term not in current_index:
+                        current_index[term] = {}
+                    current_index[term][doc['id']] = doc['stars'].count(star)
         return current_index
 
     def index_genres(self):
