@@ -5,7 +5,7 @@ import wandb
 class Evaluation:
 
     def __init__(self, name: str):
-            self.name = name
+        self.name = name
 
     def calculate_precision(self, actual: List[List[str]], predicted: List[List[str]]) -> float:
         """
