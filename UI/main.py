@@ -44,11 +44,11 @@ def search_time(start, end):
 
 
 def search_handling(
-    search_button,
-    search_term,
-    search_max_num,
-    search_weights,
-    search_method,
+        search_button,
+        search_term,
+        search_max_num,
+        search_weights,
+        search_method,
 ):
     if search_button:
         corrected_query = utils.correct_text(search_term, utils.movies_dataset)
@@ -116,7 +116,8 @@ def search_handling(
 def main():
     st.title("Search Engine")
     st.write(
-        "This is a simple search engine for IMDB movies. You can search through IMDB dataset and find the most relevant movie to your search terms."
+        "This is a simple search engine for IMDB movies. You can search through IMDB dataset and find the most "
+        "relevant movie to your search terms."
     )
     st.markdown(
         '<span style="color:yellow">Developed By: MIR Team at Sharif University</span>',
