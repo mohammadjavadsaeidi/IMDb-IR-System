@@ -3,6 +3,7 @@ from core.search import SearchEngine
 from core.spell_correction import SpellCorrection
 from core.snippet import Snippet
 from core.indexer.indexes_enum import Indexes, Index_types
+from .core.preprocess import Preprocessor
 import json
 
 movies_dataset = None  # TODO
@@ -11,7 +12,7 @@ search_engine = SearchEngine()
 
 def correct_text(text: str, all_documents: List[str]) -> str:
     """
-    Correct the give query text, if it is misspelled using Jacard similarity
+    Correct the given query text if it is misspelled using Jacard similarity
 
     Paramters
     ---------
@@ -21,10 +22,10 @@ def correct_text(text: str, all_documents: List[str]) -> str:
         The input documents.
 
     Returns
+    -------
     str
         The corrected form of the given text
     """
-    # TODO: You can add any preprocessing steps here, if needed!
     spell_correction_obj = SpellCorrection(all_documents)
     text = spell_correction_obj.spell_check(text)
     return text
@@ -103,3 +104,24 @@ def get_movie_by_id(id: str, movies_dataset: List[Dict[str, str]]) -> Dict[str, 
         f"https://www.imdb.com/title/{result['id']}"  # The url pattern of IMDb movies
     )
     return result
+
+
+def clean_text(text: str) -> str:
+    """
+    Clean the given text using the preprocessor.
+
+    Parameters
+    ----------
+    text: str
+        The text to be cleaned.
+    preprocessor: Preprocessor
+        An instance of the Preprocessor class containing the preprocessing methods.
+
+    Returns
+    -------
+    str
+        The cleaned text.
+    """
+    preprocessor = Preprocessor([text])
+    cleaned_text = preprocessor.preprocess()
+    return cleaned_text
