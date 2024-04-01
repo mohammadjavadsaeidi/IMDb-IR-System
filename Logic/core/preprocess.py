@@ -55,8 +55,8 @@ class Preprocessor:
         """
 
         text = text.lower()
-        text = ''.join([self.lemmatizer.lemmatize(work.lower()) for work in self.tokenize(text)])
-        text = ''.join([self.stemmer.stem(word) for word in self.tokenize(text)])
+        text = ' '.join([self.lemmatizer.lemmatize(work.lower()) for work in self.tokenize(text)])
+        text = ' '.join([self.stemmer.stem(word) for word in self.tokenize(text)])
         return text
 
     def remove_links(self, text: str):
@@ -137,5 +137,9 @@ def load_stopwords():
         set
             A set of stopwords.
         """
-    with open("../core/stopwords.txt", 'r') as file:
+    with open("/Users/snapp/PycharmProjects/IMDb-IR-System/Logic/core/stopwords.txt", 'r') as file:
         return file.read().splitlines()
+
+
+if __name__ == '__main__':
+    print(Preprocessor(['spider man is wonderful where google.com regression']).preprocess())

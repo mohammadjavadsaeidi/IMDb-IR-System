@@ -2,7 +2,9 @@ import time
 import os
 import json
 import copy
-from indexes_enum import Indexes  # Assuming Indexes enum is defined in 'indexes_enum.py'
+from Logic.core.preprocess import Preprocessor
+from indexes_enum import Indexes
+
 
 class Index:
     def __init__(self, preprocessed_documents: list):
@@ -84,10 +86,11 @@ class Index:
 
         current_index = {}
         for doc in self.preprocessed_documents:
-            for term in doc['summaries'].split():
-                if term not in current_index:
-                    current_index[term] = {}
-                current_index[term][doc['id']] = doc['summaries'].count(term)
+            for summary in doc['summaries']:
+                for term in summary.split():
+                    if term not in current_index:
+                        current_index[term] = {}
+                    current_index[term][doc['id']] = summary.count(term)
         return current_index
 
     def get_posting_list(self, word: str, index_type: str):
@@ -241,7 +244,6 @@ class Index:
 
         # check by getting the posting list of the word
         start = time.time()
-        # TODO: based on your implementation, you may need to change the following line
         posting_list = self.get_posting_list(check_word, index_type)
 
         end = time.time()
@@ -283,26 +285,31 @@ class Index:
             print('Add is incorrect, document')
             return
 
-        if (set(index_after_add[Indexes.STARS.value]['tim']).difference(set(index_before_add[Indexes.STARS.value]['tim']))
+        if (set(index_after_add[Indexes.STARS.value]['tim']).difference(
+                set(index_before_add[Indexes.STARS.value]['tim']))
                 != {dummy_document['id']}):
             print('Add is incorrect, tim')
             return
 
-        if (set(index_after_add[Indexes.STARS.value]['henry']).difference(set(index_before_add[Indexes.STARS.value]['henry']))
+        if (set(index_after_add[Indexes.STARS.value]['henry']).difference(
+                set(index_before_add[Indexes.STARS.value]['henry']))
                 != {dummy_document['id']}):
             print('Add is incorrect, henry')
             return
-        if (set(index_after_add[Indexes.GENRES.value]['drama']).difference(set(index_before_add[Indexes.GENRES.value]['drama']))
+        if (set(index_after_add[Indexes.GENRES.value]['drama']).difference(
+                set(index_before_add[Indexes.GENRES.value]['drama']))
                 != {dummy_document['id']}):
             print('Add is incorrect, drama')
             return
 
-        if (set(index_after_add[Indexes.GENRES.value]['crime']).difference(set(index_before_add[Indexes.GENRES.value]['crime']))
+        if (set(index_after_add[Indexes.GENRES.value]['crime']).difference(
+                set(index_before_add[Indexes.GENRES.value]['crime']))
                 != {dummy_document['id']}):
             print('Add is incorrect, crime')
             return
 
-        if (set(index_after_add[Indexes.SUMMARIES.value]['good']).difference(set(index_before_add[Indexes.SUMMARIES.value]['good']))
+        if (set(index_after_add[Indexes.SUMMARIES.value]['good']).difference(
+                set(index_before_add[Indexes.SUMMARIES.value]['good']))
                 != {dummy_document['id']}):
             print('Add is incorrect, good')
             return
@@ -317,4 +324,53 @@ class Index:
         else:
             print('Remove is incorrect')
 
+
 # TODO: Run the class with needed parameters, then run check methods and finally report the results of check methods
+if __name__ == '__main__':
+    with open("../IMDB_crawled.json", "r") as file:
+        movies = json.load(file)
+
+    counter = 0
+    preprocessed_documents = []
+    for index, movie in enumerate(movies):
+        counter += 1
+        print(counter)
+        movie = json.loads(movie)
+        movie['first_page_summary'] = Preprocessor([movie['first_page_summary']]).preprocess()[0]
+        movie['stars'] = Preprocessor(movie['stars']).preprocess()
+        movie['genres'] = Preprocessor(movie['genres']).preprocess()
+        if movie['summaries'] is not None:
+            movie['summaries'] = Preprocessor(movie['summaries']).preprocess()
+        else:
+            continue
+        if movie['synopsis'] is not None:
+            movie['synopsis'] = Preprocessor(movie['synopsis']).preprocess()
+        for review_index, review in enumerate(movie['reviews']):
+            movie['reviews'][review_index][0] = Preprocessor([review[0]]).preprocess()[0]
+        preprocessed_documents.append(movie)
+
+    index = Index(preprocessed_documents)
+    index.store_index('./index.json', None)
+    index.store_index('./index.json', Indexes.GENRES.value)
+    index.store_index('./index.json', Indexes.SUMMARIES.value)
+    index.store_index('./index.json', Indexes.STARS.value)
+    index.store_index('./index.json', Indexes.DOCUMENTS.value)
+
+
+    # check loaded correctly -> for test change load index logic and add return instead of update self.index
+    # index.store_index('./index.json', Indexes.GENRES.value)
+    # print(index.check_if_index_loaded_correctly(Indexes.GENRES.value, index.load_index('index.json/genres.json')))
+
+    # check indexing is good
+    # index.store_index('./index.json', Indexes.SUMMARIES.value)
+    # print(index.check_if_indexing_is_good(Indexes.SUMMARIES.value, 'amidst'))
+
+    # check add/remove is correct
+    # dummy_document = {
+    #     'id': '101',
+    #     'stars': ['tim', 'henry'],
+    #     'genres': ['drama', 'crime'],
+    #     'summaries': ['good']
+    # }
+    # index = Index([dummy_document])
+    # index.check_add_remove_is_correct()
