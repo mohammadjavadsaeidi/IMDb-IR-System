@@ -4,7 +4,7 @@ import json
 
 
 class Metadata_index:
-    def __init__(self, path='index.json/'):
+    def __init__(self, path='./index.json'):
         """
         Initializes the Metadata_index.
 
@@ -16,6 +16,7 @@ class Metadata_index:
         self.index_reader = Index_reader(path, Indexes.DOCUMENTS)
         self.documents = self.read_documents()
         self.metadata_index = self.create_metadata_index()
+        self.store_metadata_index(path)
 
     def read_documents(self):
         """
@@ -29,7 +30,7 @@ class Metadata_index:
         Creates the metadata index.
         """
         metadata_index = {}
-        metadata_index['averge_document_length'] = {
+        metadata_index['average_document_length'] = {
             'stars': self.get_average_document_field_length('stars'),
             'genres': self.get_average_document_field_length('genres'),
             'summaries': self.get_average_document_field_length('summaries')
@@ -59,7 +60,7 @@ class Metadata_index:
         path : str
             The path to the directory where the indexes are stored.
         """
-        path = path + Indexes.DOCUMENTS.value + '_' + Index_types.METADATA.value + '_index.json'
+        path = path + '/' + Indexes.DOCUMENTS.value + '_' + Index_types.METADATA.value + '.json'
         with open(path, 'w') as file:
             json.dump(self.metadata_index, file, indent=4)
 
