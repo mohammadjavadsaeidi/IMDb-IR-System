@@ -71,8 +71,6 @@ class SearchEngine:
         if max_results is not None:
             results = results[:max_results]
 
-
-
         return results
 
     def aggregate_scores(self, weights, scores, final_scores):
