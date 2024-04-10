@@ -361,9 +361,9 @@ if __name__ == '__main__':
     index.store_index('./index.json', Indexes.STARS.value)
     index.store_index('./index.json', Indexes.DOCUMENTS.value)
 
-
     # check loaded correctly -> for test change load index logic and add return instead of update self.index
     # index.store_index('./index.json', Indexes.GENRES.value)
+    # print('check_if_index_loaded_correctly:')
     # print(index.check_if_index_loaded_correctly(Indexes.GENRES.value, index.load_index('index.json/genres.json')))
 
     # check indexing is good
