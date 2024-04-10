@@ -4,7 +4,7 @@ import json
 
 
 class Tiered_index:
-    def __init__(self, path="./index.json"):
+    def __init__(self, path="/Users/snapp/PycharmProjects/IMDb-IR-System/Logic/core/indexer/index.json"):
         """
         Initializes the Tiered_index.
 

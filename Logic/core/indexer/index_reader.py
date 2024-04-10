@@ -1,4 +1,4 @@
-from indexes_enum import Indexes, Index_types
+from Logic.core.indexer.indexes_enum import Indexes, Index_types
 import json
 
 
@@ -16,7 +16,7 @@ class Index_reader:
         index_type : Index_types
             The type of the index to read.  
         """
-        self.path = './index.json'
+        self.path = '/Users/snapp/PycharmProjects/IMDb-IR-System/Logic/core/indexer/index.json'
         self.index_name = index_name
         self.index_type = index_type
         self.index = self.get_index()

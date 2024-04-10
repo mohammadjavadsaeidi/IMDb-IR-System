@@ -4,7 +4,7 @@ from index_reader import Index_reader
 
 
 class DocumentLengthsIndex:
-    def __init__(self, path='./index.json'):
+    def __init__(self, path='/Users/snapp/PycharmProjects/IMDb-IR-System/Logic/core/indexer/index.json'):
         """
         Initializes the DocumentLengthsIndex class.
 
