@@ -2,6 +2,8 @@ import time
 import os
 import json
 import copy
+
+from Logic.core.indexer.tiered_index import Tiered_index
 from Logic.core.preprocess import Preprocessor
 from indexes_enum import Indexes
 
@@ -13,6 +15,7 @@ class Index:
         """
 
         self.preprocessed_documents = preprocessed_documents
+        self.tiered_index = Tiered_index('./index.json')
 
         self.index = {
             Indexes.DOCUMENTS.value: self.index_documents(),
@@ -167,8 +170,9 @@ class Index:
             os.makedirs(path)
 
         if index_type is None:
-            with open(os.path.join(path, 'index.json'), 'w') as f:
-                json.dump(self.index, f, indent=4)
+            self.tiered_index.store_tiered_index(path, Indexes.STARS)
+            self.tiered_index.store_tiered_index(path, Indexes.SUMMARIES)
+            self.tiered_index.store_tiered_index(path, Indexes.GENRES)
         elif index_type in self.index:
             with open(os.path.join(path, f'{index_type}.json'), 'w') as f:
                 json.dump(self.index[index_type], f, indent=4)

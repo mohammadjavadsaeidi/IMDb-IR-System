@@ -16,7 +16,7 @@ class Index_reader:
         index_type : Index_types
             The type of the index to read.  
         """
-        self.path = path
+        self.path = './index.json'
         self.index_name = index_name
         self.index_type = index_type
         self.index = self.get_index()
@@ -30,7 +30,7 @@ class Index_reader:
         dict
             The index.
         """
-        absolute_path = self.path + self.index_name.value
+        absolute_path = self.path + '/' + self.index_name.value
 
         if self.index_type is not None:
             absolute_path = absolute_path + "_" + self.index_type.value

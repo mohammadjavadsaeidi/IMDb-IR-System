@@ -4,7 +4,7 @@ import json
 
 
 class Tiered_index:
-    def __init__(self, path="index/"):
+    def __init__(self, path="./index.json"):
         """
         Initializes the Tiered_index.
 
@@ -21,16 +21,16 @@ class Tiered_index:
         }
         # feel free to change the thresholds
         self.tiered_index = {
-            Indexes.STARS: self.convert_to_tiered_index(3, 2, Indexes.STARS),
-            Indexes.SUMMARIES: self.convert_to_tiered_index(10, 5, Indexes.SUMMARIES),
-            Indexes.GENRES: self.convert_to_tiered_index(1, 0, Indexes.GENRES)
+            Indexes.STARS.value: self.convert_to_tiered_index(3, 2, Indexes.STARS),
+            Indexes.SUMMARIES.value: self.convert_to_tiered_index(10, 5, Indexes.SUMMARIES),
+            Indexes.GENRES.value: self.convert_to_tiered_index(1, 0, Indexes.GENRES)
         }
         self.store_tiered_index(path, Indexes.STARS)
         self.store_tiered_index(path, Indexes.SUMMARIES)
         self.store_tiered_index(path, Indexes.GENRES)
 
     def convert_to_tiered_index(
-        self, first_tier_threshold: int, second_tier_threshold: int, index_name
+            self, first_tier_threshold: int, second_tier_threshold: int, index_name
     ):
         """
         Convert the current index to a tiered index.
@@ -61,7 +61,15 @@ class Tiered_index:
         first_tier = {}
         second_tier = {}
         third_tier = {}
-        #TODO
+
+        for term, postings in current_index.items():
+            if len(postings) >= first_tier_threshold:
+                first_tier[term] = postings
+            elif len(postings) >= second_tier_threshold:
+                second_tier[term] = postings
+            else:
+                third_tier[term] = postings
+
         return {
             "first_tier": first_tier,
             "second_tier": second_tier,
@@ -72,12 +80,12 @@ class Tiered_index:
         """
         Stores the tiered index to a file.
         """
-        path = path + index_name.value + "_" + Index_types.TIERED.value + "_index.json"
+        path = path + '/' + index_name.value + "_" + Index_types.TIERED.value + ".json"
         with open(path, "w") as file:
-            json.dump(self.tiered_index[index_name], file, indent=4)
+            json.dump(self.tiered_index[index_name.value], file, indent=4)
 
 
 if __name__ == "__main__":
     tiered = Tiered_index(
-        path="index/"
+        path="./index.json"
     )
