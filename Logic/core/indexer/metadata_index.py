@@ -4,7 +4,7 @@ import json
 
 
 class Metadata_index:
-    def __init__(self, path='index/'):
+    def __init__(self, path='index.json/'):
         """
         Initializes the Metadata_index.
 
