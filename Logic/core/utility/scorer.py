@@ -45,7 +45,7 @@ class Scorer:
             if term in self.index.keys():
                 list_of_documents.extend(self.index[term].keys())
         return list(set(list_of_documents))
-
+    
     def get_idf(self, term):
         """
         Returns the inverse document frequency of a term.

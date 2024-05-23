@@ -1,7 +1,7 @@
 import json
 import numpy as np
-from Logic.core.preprocess import Preprocessor
-from Logic.core.scorer import Scorer
+from Logic.core.utility.preprocess import Preprocessor
+from Logic.core.utility.scorer import Scorer
 from Logic.core.indexer.indexes_enum import Indexes, Index_types
 from Logic.core.indexer.index_reader import Index_reader
 
@@ -16,21 +16,41 @@ class SearchEngine:
         self.document_indexes = {
             Indexes.STARS: Index_reader(path, Indexes.STARS),
             Indexes.GENRES: Index_reader(path, Indexes.GENRES),
-            Indexes.SUMMARIES: Index_reader(path, Indexes.SUMMARIES)
+            Indexes.SUMMARIES: Index_reader(path, Indexes.SUMMARIES),
         }
         self.tiered_index = {
             Indexes.STARS: Index_reader(path, Indexes.STARS, Index_types.TIERED),
             Indexes.GENRES: Index_reader(path, Indexes.GENRES, Index_types.TIERED),
-            Indexes.SUMMARIES: Index_reader(path, Indexes.SUMMARIES, Index_types.TIERED)
+            Indexes.SUMMARIES: Index_reader(
+                path, Indexes.SUMMARIES, Index_types.TIERED
+            ),
         }
         self.document_lengths_index = {
-            Indexes.STARS: Index_reader(path, Indexes.STARS, Index_types.DOCUMENT_LENGTH),
-            Indexes.GENRES: Index_reader(path, Indexes.GENRES, Index_types.DOCUMENT_LENGTH),
-            Indexes.SUMMARIES: Index_reader(path, Indexes.SUMMARIES, Index_types.DOCUMENT_LENGTH)
+            Indexes.STARS: Index_reader(
+                path, Indexes.STARS, Index_types.DOCUMENT_LENGTH
+            ),
+            Indexes.GENRES: Index_reader(
+                path, Indexes.GENRES, Index_types.DOCUMENT_LENGTH
+            ),
+            Indexes.SUMMARIES: Index_reader(
+                path, Indexes.SUMMARIES, Index_types.DOCUMENT_LENGTH
+            ),
         }
-        self.metadata_index = Index_reader(path, Indexes.DOCUMENTS, Index_types.METADATA)
+        self.metadata_index = Index_reader(
+            path, Indexes.DOCUMENTS, Index_types.METADATA
+        )
 
-    def search(self, query, method, weights, safe_ranking=True, max_results=10):
+    def search(
+        self,
+        query,
+        method,
+        weights,
+        safe_ranking=True,
+        max_results=10,
+        smoothing_method=None,
+        alpha=0.5,
+        lamda=0.5,
+    ):
         """
         searches for the query in the indexes.
 
@@ -38,15 +58,22 @@ class SearchEngine:
         ----------
         query : str
             The query to search for.
-        method : str ((n|l)(n|t)(n|c).(n|l)(n|t)(n|c)) | OkapiBM25
+        method : str ((n|l)(n|t)(n|c).(n|l)(n|t)(n|c)) | OkapiBM25 | Unigram
             The method to use for searching.
         weights: dict
             The weights of the fields.
         safe_ranking : bool
-            If True, the search engine will search in whole index and then rank the results. 
+            If True, the search engine will search in whole index and then rank the results.
             If False, the search engine will search in tiered index.
         max_results : int
             The maximum number of results to return. If None, all results are returned.
+        smoothing_method : str (bayes | naive | mixture)
+            The method used for smoothing the probabilities in the unigram model.
+        alpha : float, optional
+            The parameter used in bayesian smoothing method. Defaults to 0.5.
+        lamda : float, optional
+            The parameter used in some smoothing methods to balance between the document
+            probability and the collection probability. Defaults to 0.5.
 
         Returns
         -------
@@ -55,10 +82,14 @@ class SearchEngine:
         """
 
         preprocessor = Preprocessor([query])
-        query = preprocessor.preprocess()[0].split()
+        query = preprocessor.preprocess()[0]
 
         scores = {}
-        if safe_ranking:
+        if method == "unigram":
+            self.find_scores_with_unigram_model(
+                query, smoothing_method, weights, scores, alpha, lamda
+            )
+        elif safe_ranking:
             self.find_scores_with_safe_ranking(query, method, weights, scores)
         else:
             self.find_scores_with_unsafe_ranking(query, method, weights, max_results, scores)
@@ -136,6 +167,31 @@ class SearchEngine:
         for field in weights:
             scorer = Scorer(self.document_indexes[field].index,954)
             scores[field] = scorer.compute_scores_with_vector_space_model(query, method)
+
+    def find_scores_with_unigram_model(
+        self, query, smoothing_method, weights, scores, alpha=0.5, lamda=0.5
+    ):
+        """
+        Calculates the scores for each document based on the unigram model.
+
+        Parameters
+        ----------
+        query : str
+            The query to search for.
+        smoothing_method : str (bayes | naive | mixture)
+            The method used for smoothing the probabilities in the unigram model.
+        weights : dict
+            A dictionary mapping each field (e.g., 'stars', 'genres', 'summaries') to its weight in the final score. Fields with a weight of 0 are ignored.
+        scores : dict
+            The scores of the documents.
+        alpha : float, optional
+            The parameter used in bayesian smoothing method. Defaults to 0.5.
+        lamda : float, optional
+            The parameter used in some smoothing methods to balance between the document
+            probability and the collection probability. Defaults to 0.5.
+        """
+        # TODO
+        pass
 
     def merge_scores(self, scores1, scores2):
         """
