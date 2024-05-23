@@ -4,8 +4,8 @@ import json
 import copy
 
 from Logic.core.indexer.tiered_index import Tiered_index
-from Logic.core.preprocess import Preprocessor
-from indexes_enum import Indexes
+from Logic.core.utility.preprocess import Preprocessor
+from .indexes_enum import Indexes
 
 
 class Index:

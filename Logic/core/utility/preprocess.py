@@ -137,7 +137,7 @@ def load_stopwords():
         set
             A set of stopwords.
         """
-    with open("/Users/snapp/PycharmProjects/IMDb-IR-System/Logic/core/stopwords.txt", 'r') as file:
+    with open("/Users/snapp/PycharmProjects/IMDb-IR-System/Logic/core/utility/stopwords.txt", 'r') as file:
         return file.read().splitlines()
 
 

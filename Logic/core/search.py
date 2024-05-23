@@ -82,7 +82,7 @@ class SearchEngine:
         """
 
         preprocessor = Preprocessor([query])
-        query = preprocessor.preprocess()[0]
+        query = preprocessor.preprocess()[0].split()
 
         scores = {}
         if method == "unigram":
