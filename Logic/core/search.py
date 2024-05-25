@@ -120,7 +120,6 @@ class SearchEngine:
         for doc_id in scores:
             for field, score in scores[doc_id].items():
                 final_scores[field] = score * weights[doc_id]
-            # final_scores[doc_id] = final_score
 
     def find_scores_with_unsafe_ranking(self, query, method, weights, max_results, scores):
         """
@@ -190,8 +189,14 @@ class SearchEngine:
             The parameter used in some smoothing methods to balance between the document
             probability and the collection probability. Defaults to 0.5.
         """
-        # TODO
-        pass
+        for field, weight in weights.items():
+            if weight == 0:
+                continue
+
+            document_lengths = self.document_lengths_index[field].get_index()
+            scorer = Scorer(self.document_indexes[field].get_index(), len(document_lengths))
+            scores[field] = scorer.compute_scores_with_unigram_model(query, smoothing_method, document_lengths, alpha, lamda)
+        return scores
 
     def merge_scores(self, scores1, scores2):
         """
@@ -227,6 +232,6 @@ if __name__ == '__main__':
         Indexes.GENRES: 1,
         Indexes.SUMMARIES: 1
     }
-    result = search_engine.search(query, method, weights)
+    result = search_engine.search(query, method, weights, smoothing_method='naive')
 
     print(result)
