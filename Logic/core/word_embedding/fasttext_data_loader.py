@@ -1,6 +1,7 @@
 import pandas as pd
 from tqdm import tqdm
 from sklearn.preprocessing import LabelEncoder
+from Logic.core.word_embedding.preprocessing import preprocess_text
 
 
 class FastTextDataLoader:
@@ -10,6 +11,7 @@ class FastTextDataLoader:
     It takes the file path to a data source containing movie information (synopses, summaries, reviews, titles, genres) as input.
     The class provides methods to read the data into a pandas DataFrame, pre-process the text data, and create training data (features and labels)
     """
+
     def __init__(self, file_path):
         """
         Initializes the FastTextDataLoader class with the file path to the data source.
@@ -20,7 +22,6 @@ class FastTextDataLoader:
             The path to the file containing movie information.
         """
         self.file_path = file_path
-        pass
 
     def read_data_to_df(self):
         """
@@ -34,7 +35,28 @@ class FastTextDataLoader:
         ----------
             pd.DataFrame: A pandas DataFrame containing movie information (synopses, summaries, reviews, titles, genres).
         """
-        pass
+        data = pd.read_json(self.file_path)
+
+        # Extract movie details
+        records = []
+        for movie_id, movie_details in data.items():
+            reviews = movie_details.get('reviews', [])
+            # Convert list of lists to list of strings
+            review_texts = [' '.join(review) for review in reviews]
+            # Join all review texts into a single string
+
+            review_text = ' '.join(review_texts)
+
+            record = {
+                'title': movie_details.get('title', ''),
+                'genres': ''.join(movie_details.get('genres', '')),
+                'synopsis': movie_details.get('synopsis', ''),
+                'summaries': movie_details.get('summaries', ''),
+                'reviews': review_text
+            }
+            records.append(record)
+
+        return pd.DataFrame(records)
 
     def create_train_data(self):
         """
@@ -43,6 +65,18 @@ class FastTextDataLoader:
         Returns:
             tuple: A tuple containing two NumPy arrays: X (preprocessed text data) and y (encoded genre labels).
         """
-        pass
+        df = self.read_data_to_df()
 
+        # Preprocess text data
+        df['text'] = str(df['synopsis'].fillna('')) + ' ' + str(df['summaries'].fillna('')) + ' ' + str(df['reviews'].fillna(
+            '')) + ' ' + df['title'].fillna('')
+        df['text'] = df['text'].apply(lambda x: preprocess_text(x))
 
+        # Encode labels
+        le = LabelEncoder()
+        df['genres'] = le.fit_transform(df['genres'])
+
+        X = df['text'].values
+        y = df['genres'].values
+
+        return X, y
