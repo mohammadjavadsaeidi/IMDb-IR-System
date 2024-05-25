@@ -1,6 +1,8 @@
-from .graph import LinkGraph
-from ..indexer.indexes_enum import Indexes
-from ..indexer.index_reader import Index_reader
+import json
+from Logic.core.link_analysis.graph import LinkGraph
+from Logic.core.indexer.indexes_enum import Indexes
+from Logic.core.indexer.index_reader import Index_reader
+
 
 class LinkAnalyzer:
     def __init__(self, root_set):
@@ -17,8 +19,8 @@ class LinkAnalyzer:
         """
         self.root_set = root_set
         self.graph = LinkGraph()
-        self.hubs = []
-        self.authorities = []
+        self.hubs = set()
+        self.authorities = set()
         self.initiate_params()
 
     def initiate_params(self):
@@ -30,8 +32,15 @@ class LinkAnalyzer:
         This function has no parameters. You can use self to get or change attributes
         """
         for movie in self.root_set:
-            #TODO
-            pass
+            movie = json.loads(movie)
+            movie_title = movie['title']
+            self.graph.add_node(movie_title)
+            self.authorities.add(movie_title)
+            for star in movie['stars']:
+                self.graph.add_node(star)
+                self.graph.add_edge(star, movie_title)
+                self.graph.add_edge(movie_title, star)
+                self.hubs.add(star)
 
     def expand_graph(self, corpus):
         """
@@ -50,8 +59,15 @@ class LinkAnalyzer:
         and refer to the nodes in the root set to the graph and to the list of hubs and authorities.
         """
         for movie in corpus:
-            #TODO
-            pass
+            movie = json.loads(movie)
+            for star in movie['stars']:
+                if star in self.hubs or star in self.authorities:
+                    movie_title = movie['title']
+                    self.graph.add_node(movie_title)
+                    self.authorities.add(movie_title)
+                    self.graph.add_edge(star, movie_title)
+                    self.graph.add_edge(movie_title, star)
+                    self.hubs.add(star)
 
     def hits(self, num_iteration=5, max_result=10):
         """
@@ -71,21 +87,46 @@ class LinkAnalyzer:
         list
             List of names of 10 movies with the most scores obtained by Hits algorithm in descending order
         """
-        a_s = []
-        h_s = []
+        hubs = {node: 1.0 for node in self.hubs}
+        authorities = {node: 1.0 for node in self.authorities}
 
-        #TODO
+        for _ in range(num_iteration):
+            new_authorities = {node: 0.0 for node in authorities}
+            for node in authorities:
+                for predecessor in self.graph.get_predecessors(node):
+                    new_authorities[node] += hubs[predecessor]
+            norm = sum(new_authorities.values())
+            for node in new_authorities:
+                new_authorities[node] /= norm
 
-        return a_s, h_s
+            new_hubs = {node: 0.0 for node in hubs}
+            for node in hubs:
+                for successor in self.graph.get_successors(node):
+                    new_hubs[node] += new_authorities[successor]
+            norm = sum(new_hubs.values())
+            for node in new_hubs:
+                new_hubs[node] /= norm
+
+            hubs, authorities = new_hubs, new_authorities
+
+        top_actors = sorted(hubs.items(), key=lambda item: item[1], reverse=True)[:max_result]
+        top_movies = sorted(authorities.items(), key=lambda item: item[1], reverse=True)[:max_result]
+
+        return [actor for actor, score in top_actors], [movie for movie, score in top_movies]
+
 
 if __name__ == "__main__":
-    # You can use this section to run and test the results of your link analyzer
-    corpus = []    # TODO: it shoud be your crawled data
-    root_set = []   # TODO: it shoud be a subset of your corpus
+    crawled_data_path = '/Users/snapp/PycharmProjects/IMDb-IR-System/Logic/core/IMDB_crawled.json'
+
+    with open(crawled_data_path, 'r') as file:
+        corpus = json.load(file)
+
+    root_set = corpus[:10]
 
     analyzer = LinkAnalyzer(root_set=root_set)
     analyzer.expand_graph(corpus=corpus)
     actors, movies = analyzer.hits(max_result=5)
+
     print("Top Actors:")
     print(*actors, sep=' - ')
     print("Top Movies:")
