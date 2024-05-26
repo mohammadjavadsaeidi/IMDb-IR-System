@@ -116,7 +116,7 @@ class FastText:
         """
         self.model = fasttext.load_model(path)
 
-    def prepare(self, dataset, mode, save=False, path='FastText_model.bin'):
+    def prepare(self, dataset, mode, path='FastText_model.bin'):
         """
         Prepares the FastText model.
 
@@ -131,7 +131,7 @@ class FastText:
             self.train(dataset)
         if mode == 'load':
             self.load_model(path)
-        if save:
+        if mode == 'save':
             self.save_model(path)
 
 
