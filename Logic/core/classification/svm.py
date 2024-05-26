@@ -1,9 +1,9 @@
 import numpy as np
 from sklearn.metrics import classification_report
 from sklearn.svm import SVC
-
-from .basic_classifier import BasicClassifier
-from .data_loader import ReviewLoader
+from Logic.core.classification.data_loader import ReviewLoader
+from Logic.core.classification.basic_classifier import BasicClassifier
+from Logic.core.classification.data_loader import ReviewLoader
 
 
 class SVMClassifier(BasicClassifier):
@@ -21,7 +21,7 @@ class SVMClassifier(BasicClassifier):
         y: np.ndarray
             The real class label for each doc
         """
-        pass
+        self.model.fit(x, y)
 
     def predict(self, x):
         """
@@ -35,7 +35,7 @@ class SVMClassifier(BasicClassifier):
             Return the predicted class for each doc
             with the highest probability (argmax)
         """
-        pass
+        return self.model.predict(x)
 
     def prediction_report(self, x, y):
         """
@@ -50,12 +50,23 @@ class SVMClassifier(BasicClassifier):
         str
             Return the classification report
         """
-        pass
+        predictions = self.predict(x)
+        return classification_report(y, predictions)
 
 
 # F1 accuracy : 78%
 if __name__ == '__main__':
-    """
-    Fit the model with the training data and predict the test data, then print the classification report
-    """
-    pass
+    file_path = './IMDB_Dataset.csv'
+    fasttext_model_path = '/Users/snapp/PycharmProjects/IMDb-IR-System/Logic/core/word_embedding/FastText_model.bin'
+    review_loader = ReviewLoader(file_path, fasttext_model_path)
+    review_loader.load_data()
+    review_loader.get_embeddings()
+    x_train, x_test, y_train, y_test = review_loader.split_data()
+
+    classifier = SVMClassifier()
+    classifier.fit(x_train, y_train)
+
+    predictions = classifier.predict(x_test)
+
+    report = classification_report(y_test, predictions)
+    print(report)

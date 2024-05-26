@@ -1,12 +1,10 @@
 import numpy as np
 from tqdm import tqdm
-
 from ..word_embedding.fasttext_model import FastText
-
 
 class BasicClassifier:
     def __init__(self):
-        raise NotImplementedError()
+        self.model = None
 
     def fit(self, x, y):
         raise NotImplementedError()
@@ -29,5 +27,7 @@ class BasicClassifier:
         float
             The percentage of positive reviews
         """
-        pass
-
+        predictions = self.predict(sentences)
+        positive_count = sum(predictions)
+        total_count = len(predictions)
+        return (positive_count / total_count) * 100 if total_count > 0 else 0.0
