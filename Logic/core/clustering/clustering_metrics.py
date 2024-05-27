@@ -44,11 +44,8 @@ class ClusteringMetrics:
         float
             The purity score, ranging from 0 to 1, where a higher value indicates better clustering.
         """
-        # Compute confusion matrix
         matrix = confusion_matrix(true_labels, cluster_labels)
-        # Find the number of correctly classified instances
         correct_preds = np.sum(np.amax(matrix, axis=0))
-        # Calculate the purity score
         return correct_preds / np.sum(matrix)
 
     def adjusted_rand_score(self, true_labels: List, cluster_labels: List) -> float:

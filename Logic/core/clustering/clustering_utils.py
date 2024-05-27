@@ -1,7 +1,5 @@
 import matplotlib.pyplot as plt
 import numpy as np
-import random
-import operator
 import wandb
 from typing import List, Tuple
 from scipy.cluster.hierarchy import dendrogram, linkage
@@ -188,25 +186,20 @@ class ClusteringUtils:
         # Initialize wandb
         run = wandb.init(project=project_name, name=run_name)
 
-        # Perform K-means clustering
         kmeans = KMeans(n_clusters=n_clusters, random_state=42)
         labels = kmeans.fit_predict(data)
 
-        # Convert to 2D using t-SNE for visualization
         tsne = TSNE(n_components=2, random_state=42)
         data_2d = tsne.fit_transform(data)
 
-        # Plot the clusters
         plt.figure(figsize=(10, 6))
         plt.scatter(data_2d[:, 0], data_2d[:, 1], c=labels, cmap='viridis')
         plt.title(f'K-Means Clustering with {n_clusters} Clusters')
         plt.xlabel('Component 1')
         plt.ylabel('Component 2')
 
-        # Log the plot to wandb
         wandb.log({"K-Means Clustering": wandb.Image(plt)})
 
-        # Close the plot display window if needed (optional)
         plt.close()
 
     def wandb_plot_hierarchical_clustering_dendrogram(self, data, project_name, linkage_method, run_name):
@@ -242,17 +235,14 @@ class ClusteringUtils:
         # Perform hierarchical clustering
         Z = linkage(data, method=linkage_method)
 
-        # Create dendrogram
         plt.figure(figsize=(10, 6))
         dendrogram(Z)
         plt.title(f'Hierarchical Clustering Dendrogram ({linkage_method} linkage)')
         plt.xlabel('Sample index')
         plt.ylabel('Distance')
 
-        # Log the plot to wandb
         wandb.log({"Hierarchical Clustering Dendrogram": wandb.Image(plt)})
 
-        # Close the plot display window if needed (optional)
         plt.close()
 
     def plot_kmeans_cluster_scores(self, embeddings: List, true_labels: List, k_values: List[int], project_name=None,
@@ -288,7 +278,6 @@ class ClusteringUtils:
             silhouette_scores.append(silhouette)
             purity_scores.append(purity)
 
-        # Plotting the scores
         plt.figure(figsize=(10, 6))
         plt.plot(k_values, silhouette_scores, label='Silhouette Score', marker='o')
         plt.plot(k_values, purity_scores, label='Purity Score', marker='o')
@@ -297,9 +286,9 @@ class ClusteringUtils:
         plt.title('K-Means Clustering Scores')
         plt.legend()
 
-        # Logging the plot to wandb
+        # Initialize wandb
         if project_name and run_name:
-            wandb.init(project=project_name, name=run_name)
+            run = wandb.init(project=project_name, name=run_name)
             wandb.log({"Cluster Scores": wandb.Image(plt)})
 
         plt.close()
@@ -333,20 +322,17 @@ class ClusteringUtils:
         # Initialize wandb
         run = wandb.init(project=project_name, name=run_name)
 
-        # Compute WCSS values for different K values
         wcss_values = []
         for k in k_values:
             _, _, wcss = self.cluster_kmeans_WCSS(embeddings, k)
             wcss_values.append(wcss)
 
-        # Plot the elbow method
         plt.figure(figsize=(10, 6))
         plt.plot(k_values, wcss_values, marker='o')
         plt.xlabel('Number of clusters (k)')
         plt.ylabel('WCSS')
         plt.title('Elbow Method for Optimal k')
 
-        # Log the plot to wandb
         wandb.log({"Elbow Method": wandb.Image(plt)})
 
         plt.close()

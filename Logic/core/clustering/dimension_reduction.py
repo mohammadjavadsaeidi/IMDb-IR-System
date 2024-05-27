@@ -72,20 +72,16 @@ class DimensionReduction:
         # Initialize wandb
         run = wandb.init(project=project_name, name=run_name)
 
-        # Perform t-SNE dimensionality reduction
         reduced_data = self.tsne_2d.fit_transform(data)
 
-        # Plot the t-SNE embeddings
         plt.figure(figsize=(10, 6))
         plt.scatter(reduced_data[:, 0], reduced_data[:, 1], cmap='viridis')
         plt.title('t-SNE 2D Embeddings')
         plt.xlabel('Component 1')
         plt.ylabel('Component 2')
 
-        # Log the plot to wandb
         wandb.log({"t-SNE 2D Embeddings": wandb.Image(plt)})
 
-        # Close the plot display window if needed (optional)
         plt.close()
 
     def wandb_plot_explained_variance_by_components(self, data, project_name, run_name):
@@ -115,11 +111,9 @@ class DimensionReduction:
         None
         """
 
-        # Fit PCA and compute cumulative explained variance ratio
         pca = PCA().fit(data)
         cumulative_explained_variance = np.cumsum(pca.explained_variance_ratio_)
 
-        # Create the plot
         plt.figure(figsize=(10, 6))
         plt.plot(range(1, len(cumulative_explained_variance) + 1), cumulative_explained_variance, marker='o')
         plt.xlabel('Number of components')
@@ -129,8 +123,6 @@ class DimensionReduction:
         # Initialize wandb
         run = wandb.init(project=project_name, name=run_name)
 
-        # Log the plot to wandb
         wandb.log({"Explained Variance": wandb.Image(plt)})
 
-        # Close the plot display window if needed (optional)
         plt.close()

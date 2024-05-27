@@ -1,7 +1,3 @@
-import numpy as np
-import os
-from tqdm import tqdm
-from sklearn.model_selection import train_test_split
 import wandb
 from Logic.core.word_embedding.fasttext_model import FastText
 from Logic.core.classification.data_loader import ReviewLoader
@@ -87,7 +83,6 @@ if __name__ == "__main__":
 
     # 3. Evaluation
     print("3. Evaluation")
-    # Using clustering metrics to evaluate the final chosen clustering method
     final_cluster_labels = clustering_utils.cluster_kmeans(pca_embeddings, optimal_k)[1]
     silhouette_final = clustering_metrics.silhouette_score(pca_embeddings, final_cluster_labels)
     purity_final = clustering_metrics.purity_score(sentiments, final_cluster_labels)
