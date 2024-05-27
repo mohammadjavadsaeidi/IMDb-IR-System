@@ -44,6 +44,7 @@ class ReviewLoader:
         Get the embeddings for the reviews using the fasttext model.
         """
         self.embeddings = [self.fasttext_model.get_query_embedding(review) for review in tqdm(self.review_tokens)]
+        return self.embeddings, self.sentiments
 
     def split_data(self, test_data_ratio=0.2):
         """

@@ -1,0 +1,49 @@
+{
+    "os": "macOS-14.4.1-arm64-arm-64bit",
+    "python": "3.9.6",
+    "heartbeatAt": "2024-05-27T14:15:06.162352",
+    "startedAt": "2024-05-27T14:14:58.932137",
+    "docker": null,
+    "cuda": null,
+    "args": [],
+    "state": "running",
+    "program": "/Users/snapp/PycharmProjects/IMDb-IR-System/Logic/core/clustering/main.py",
+    "codePathLocal": "main.py",
+    "codePath": "Logic/core/clustering/main.py",
+    "git": {
+        "remote": "git@github.com:mohammadjavadsaeidi/IMDb-IR-System.git",
+        "commit": "38dc470723e5954314f3afe5dc2ced3393fe2b16"
+    },
+    "email": "mohamadjavad.saeidi@snapp.cab",
+    "root": "/Users/snapp/PycharmProjects/IMDb-IR-System",
+    "host": "Snapps-MacBook-Pro-3.local",
+    "username": "snapp",
+    "executable": "/Library/Developer/CommandLineTools/usr/bin/python3",
+    "cpu_count": 8,
+    "cpu_count_logical": 8,
+    "cpu_freq": {
+        "current": 3204,
+        "min": 600,
+        "max": 3204
+    },
+    "cpu_freq_per_core": [
+        {
+            "current": 3204,
+            "min": 600,
+            "max": 3204
+        }
+    ],
+    "disk": {
+        "/": {
+            "total": 228.27386474609375,
+            "used": 12.545551300048828
+        }
+    },
+    "gpuapple": {
+        "type": "arm",
+        "vendor": "Apple"
+    },
+    "memory": {
+        "total": 8.0
+    }
+}

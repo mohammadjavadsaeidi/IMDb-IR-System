@@ -9,7 +9,7 @@ from sklearn.cluster import AgglomerativeClustering
 from sklearn.cluster import KMeans
 from collections import Counter
 from sklearn.manifold import TSNE
-from Logic.core.clustering.clustering_metrics import *
+from Logic.core.clustering.clustering_metrics import ClusteringMetrics
 
 
 class ClusteringUtils:
@@ -282,8 +282,8 @@ class ClusteringUtils:
         purity_scores = []
         for k in k_values:
             _, labels = self.cluster_kmeans(embeddings, k)
-            silhouette = silhouette_score(embeddings, labels)
-            purity = purity_score(true_labels, labels)
+            silhouette = ClusteringMetrics.silhouette_score(embeddings, labels)
+            purity = ClusteringMetrics.purity_score(true_labels, labels)
             silhouette_scores.append(silhouette)
             purity_scores.append(purity)
 
@@ -298,7 +298,7 @@ class ClusteringUtils:
 
         # Logging the plot to wandb
         if project_name and run_name:
-            run = wandb.init(project=project_name, name=run_name)
+            wandb.init(project=project_name, name=run_name)
             wandb.log({"Cluster Scores": wandb.Image(plt)})
 
         plt.close()

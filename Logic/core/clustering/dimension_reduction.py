@@ -2,6 +2,7 @@ from sklearn.decomposition import PCA
 from sklearn.manifold import TSNE
 import wandb
 import matplotlib.pyplot as plt
+import numpy as np
 
 
 class DimensionReduction:

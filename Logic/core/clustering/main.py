@@ -2,43 +2,98 @@ import numpy as np
 import os
 from tqdm import tqdm
 from sklearn.model_selection import train_test_split
-
-from ..word_embedding.fasttext_data_loader import FastTextDataLoader
-from ..word_embedding.fasttext_model import FastText
-from .dimension_reduction import DimensionReduction
-from .clustering_metrics import ClusteringMetrics
-from .clustering_utils import ClusteringUtils
+import wandb
+from Logic.core.word_embedding.fasttext_model import FastText
+from Logic.core.classification.data_loader import ReviewLoader
+from Logic.core.clustering.dimension_reduction import DimensionReduction
+from Logic.core.clustering.clustering_metrics import ClusteringMetrics
+from Logic.core.clustering.clustering_utils import ClusteringUtils
 
 # Main Function: Clustering Tasks
 
-# 0. Embedding Extraction
-# TODO: Using the previous preprocessor and fasttext model, collect all the embeddings of our data and store them.
+if __name__ == "__main__":
 
-# 1. Dimension Reduction
-# TODO: Perform Principal Component Analysis (PCA):
-#     - Reduce the dimensionality of features using PCA. (you can use the reduced feature afterward or use to the whole embeddings)
-#     - Find the Singular Values and use the explained_variance_ratio_ attribute to determine the percentage of variance explained by each principal component.
-#     - Draw plots to visualize the results.
+    wandb.login(key="4b77efc93dfc702229a106ec1e610e26af4593f7")
 
-# TODO: Implement t-SNE (t-Distributed Stochastic Neighbor Embedding):
-#     - Create the convert_to_2d_tsne function, which takes a list of embedding vectors as input and reduces the dimensionality to two dimensions using the t-SNE method.
-#     - Use the output vectors from this step to draw the diagram.
+    # 0. Embedding Extraction
+    print("0. Embedding Extraction")
+    file_path = '/Users/snapp/PycharmProjects/IMDb-IR-System/Logic/core/classification/IMDB_Dataset.csv'
+    fasttext_model_path = '/Users/snapp/PycharmProjects/IMDb-IR-System/Logic/core/word_embedding/FastText_model.bin'
 
-# 2. Clustering
-## K-Means Clustering
-# TODO: Implement the K-means clustering algorithm from scratch.
-# TODO: Create document clusters using K-Means.
-# TODO: Run the algorithm with several different values of k.
-# TODO: For each run:
-#     - Determine the genre of each cluster based on the number of documents in each cluster.
-#     - Draw the resulting clustering using the two-dimensional vectors from the previous section.
-#     - Check the implementation and efficiency of the algorithm in clustering similar documents.
-# TODO: Draw the silhouette score graph for different values of k and perform silhouette analysis to choose the appropriate k.
-# TODO: Plot the purity value for k using the labeled data and report the purity value for the final k. (Use the provided functions in utilities)
+    review_loader = ReviewLoader(file_path, fasttext_model_path)
+    review_loader.load_data()
 
-## Hierarchical Clustering
-# TODO: Perform hierarchical clustering with all different linkage methods.
-# TODO: Visualize the results.
+    fasttext = FastText()
+    fasttext.load_model(fasttext_model_path)
 
-# 3. Evaluation
-# TODO: Using clustering metrics, evaluate how well your clustering method is performing.
+    embeddings, sentiments = review_loader.get_embeddings()
+
+    # 1. Dimension Reduction
+    print("1. Dimension Reduction")
+    dim_reduction = DimensionReduction()
+
+    # Perform PCA
+    n_components = 50
+    pca_embeddings = dim_reduction.pca_reduce_dimension(embeddings, n_components)
+
+    # Plot PCA explained variance
+    dim_reduction.wandb_plot_explained_variance_by_components(
+        embeddings, project_name="ClusteringProject", run_name="PCA Explained Variance"
+    )
+
+    # Perform t-SNE
+    tsne_embeddings = dim_reduction.convert_to_2d_tsne(pca_embeddings)
+
+    # Plot t-SNE results
+    dim_reduction.wandb_plot_2d_tsne(
+        tsne_embeddings, project_name="ClusteringProject", run_name="t-SNE Visualization"
+    )
+
+    # 2. Clustering
+    print("2. Clustering")
+    clustering_utils = ClusteringUtils()
+    clustering_metrics = ClusteringMetrics()
+
+    # K-Means Clustering
+    k_values = range(2, 9)
+
+    # Evaluate K-Means clustering with different k values
+    for k in k_values:
+        cluster_centers, cluster_labels = clustering_utils.cluster_kmeans(pca_embeddings, k)
+        silhouette = clustering_metrics.silhouette_score(pca_embeddings, cluster_labels)
+        purity = clustering_metrics.purity_score(sentiments, cluster_labels)
+        print(f"K-Means Clustering with k={k}: Silhouette Score = {silhouette}, Purity = {purity}")
+
+    # Plot K-Means clustering scores
+    clustering_utils.plot_kmeans_cluster_scores(
+        pca_embeddings, sentiments, list(k_values), project_name="ClusteringProject", run_name="K-Means Scores"
+    )
+
+    # Visualize K-Means clustering for the optimal k value
+    optimal_k = 5
+    clustering_utils.visualize_kmeans_clustering_wandb(
+        pca_embeddings, optimal_k, project_name="ClusteringProject", run_name=f"K-Means Clustering with k={optimal_k}"
+    )
+
+    # Hierarchical Clustering
+    linkage_methods = ['single', 'complete', 'average', 'ward']
+
+    for method in linkage_methods:
+        cluster_labels = getattr(clustering_utils, f'cluster_hierarchical_{method}')(pca_embeddings)
+        clustering_utils.wandb_plot_hierarchical_clustering_dendrogram(
+            pca_embeddings, project_name="ClusteringProject", linkage_method=method,
+            run_name=f"Hierarchical Clustering ({method})"
+        )
+
+    # 3. Evaluation
+    print("3. Evaluation")
+    # Using clustering metrics to evaluate the final chosen clustering method
+    final_cluster_labels = clustering_utils.cluster_kmeans(pca_embeddings, optimal_k)[1]
+    silhouette_final = clustering_metrics.silhouette_score(pca_embeddings, final_cluster_labels)
+    purity_final = clustering_metrics.purity_score(sentiments, final_cluster_labels)
+    adjusted_rand_final = clustering_metrics.adjusted_rand_score(sentiments, final_cluster_labels)
+
+    print(f"Final Evaluation for K-Means with k={optimal_k}:")
+    print(f"Silhouette Score = {silhouette_final}")
+    print(f"Purity = {purity_final}")
+    print(f"Adjusted Rand Index = {adjusted_rand_final}")
