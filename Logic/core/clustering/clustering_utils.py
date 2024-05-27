@@ -280,10 +280,11 @@ class ClusteringUtils:
         """
         silhouette_scores = []
         purity_scores = []
+        clustering_metrics = ClusteringMetrics()
         for k in k_values:
             _, labels = self.cluster_kmeans(embeddings, k)
-            silhouette = ClusteringMetrics.silhouette_score(embeddings, labels)
-            purity = ClusteringMetrics.purity_score(true_labels, labels)
+            silhouette = clustering_metrics.silhouette_score(embeddings, labels)
+            purity = clustering_metrics.purity_score(true_labels, labels)
             silhouette_scores.append(silhouette)
             purity_scores.append(purity)
 
