@@ -1,2 +1,3 @@
 Logic/core/indexer/index.json/documents.json filter=lfs diff=lfs merge=lfs -text
 Logic/core/IMDB_crawled.json filter=lfs diff=lfs merge=lfs -text
+Logic/core/word_embedding/FastText_model.bin filter=lfs diff=lfs merge=lfs -text
