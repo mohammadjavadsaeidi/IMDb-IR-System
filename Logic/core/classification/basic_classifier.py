@@ -2,6 +2,7 @@ import numpy as np
 from tqdm import tqdm
 from ..word_embedding.fasttext_model import FastText
 
+
 class BasicClassifier:
     def __init__(self):
         self.model = None

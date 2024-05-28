@@ -11,6 +11,7 @@ import numpy as np
 from Logic.core.word_embedding.fasttext_data_loader import FastTextDataLoader
 from Logic.core.word_embedding.preprocessing import preprocess_text
 
+
 class FastText:
     """
     A class used to train a FastText model and generate embeddings for text data.
