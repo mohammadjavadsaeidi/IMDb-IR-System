@@ -1,5 +1,5 @@
-from .index_reader import Index_reader
-from .indexes_enum import Indexes, Index_types
+from Logic.core.indexer.index_reader import Index_reader
+from Logic.core.indexer.indexes_enum import Indexes, Index_types
 import json
 
 

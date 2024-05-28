@@ -143,7 +143,7 @@ class SearchEngine:
                 for doc_id in self.tiered_index[field].index[tier]:
                     if doc_id not in scores:
                         scores[doc_id] = {}
-                    scorer = Scorer(self.document_indexes[field].index, 954)
+                    scorer = Scorer(self.document_indexes[field].index, 3833)
                     score = scorer.compute_scores_with_vector_space_model(query, method)[doc_id]
                     scores[doc_id][field] = score
 
@@ -164,7 +164,7 @@ class SearchEngine:
         """
 
         for field in weights:
-            scorer = Scorer(self.document_indexes[field].index,954)
+            scorer = Scorer(self.document_indexes[field].index,3833)
             scores[field] = scorer.compute_scores_with_vector_space_model(query, method)
 
     def find_scores_with_unigram_model(

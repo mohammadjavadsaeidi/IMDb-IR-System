@@ -32,7 +32,7 @@ class LinkAnalyzer:
         This function has no parameters. You can use self to get or change attributes
         """
         for movie in self.root_set:
-            movie = json.loads(movie)
+            #movie = json.loads(movie)
             movie_title = movie['title']
             self.graph.add_node(movie_title)
             self.authorities.add(movie_title)
@@ -59,7 +59,9 @@ class LinkAnalyzer:
         and refer to the nodes in the root set to the graph and to the list of hubs and authorities.
         """
         for movie in corpus:
-            movie = json.loads(movie)
+            #movie = json.loads(movie)
+            if movie['stars'] is None:
+                continue
             for star in movie['stars']:
                 if star in self.hubs or star in self.authorities:
                     movie_title = movie['title']

@@ -42,6 +42,8 @@ class FastTextDataLoader:
         for movie_id, movie_details in data.items():
             reviews = movie_details.get('reviews', [])
             # Convert list of lists to list of strings
+            if reviews is None:
+                continue
             review_texts = [' '.join(review) for review in reviews]
             # Join all review texts into a single string
 
@@ -68,8 +70,9 @@ class FastTextDataLoader:
         df = self.read_data_to_df()
 
         # Preprocess text data
-        df['text'] = str(df['synopsis'].fillna('')) + ' ' + str(df['summaries'].fillna('')) + ' ' + str(df['reviews'].fillna(
-            '')) + ' ' + df['title'].fillna('')
+        df['text'] = str(df['synopsis'].fillna('')) + ' ' + str(df['summaries'].fillna('')) + ' ' + str(
+            df['reviews'].fillna(
+                '')) + ' ' + df['title'].fillna('')
         df['text'] = df['text'].apply(lambda x: preprocess_text(x))
 
         # Encode labels

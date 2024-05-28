@@ -5,7 +5,7 @@ import copy
 
 from Logic.core.indexer.tiered_index import Tiered_index
 from Logic.core.utility.preprocess import Preprocessor
-from .indexes_enum import Indexes
+from Logic.core.indexer.indexes_enum import Indexes
 
 
 class Index:
@@ -340,18 +340,30 @@ if __name__ == '__main__':
     for index, movie in enumerate(movies):
         counter += 1
         print(counter)
-        movie = json.loads(movie)
-        movie['first_page_summary'] = Preprocessor([movie['first_page_summary']]).preprocess()[0]
-        movie['stars'] = Preprocessor(movie['stars']).preprocess()
-        movie['genres'] = Preprocessor(movie['genres']).preprocess()
+        #movie = json.loads(movie)
+        if movie['first_page_summary'] is not None:
+            movie['first_page_summary'] = Preprocessor([movie['first_page_summary']]).preprocess()[0]
+        else:
+            continue
+        if movie['stars'] is not None:
+            movie['stars'] = Preprocessor(movie['stars']).preprocess()
+        else:
+            continue
+        if movie['genres'] is not None:
+            movie['genres'] = Preprocessor(movie['genres']).preprocess()
+        else:
+            continue
         if movie['summaries'] is not None:
             movie['summaries'] = Preprocessor(movie['summaries']).preprocess()
         else:
             continue
-        if movie['synopsis'] is not None:
-            movie['synopsis'] = Preprocessor(movie['synopsis']).preprocess()
-        for review_index, review in enumerate(movie['reviews']):
-            movie['reviews'][review_index][0] = Preprocessor([review[0]]).preprocess()[0]
+        if movie['synposis'] is not None:
+            movie['synposis'] = Preprocessor(movie['synposis']).preprocess()
+        else:
+            continue
+        if movie['reviews'] is not None:
+            for review_index, review in enumerate(movie['reviews']):
+                movie['reviews'][review_index][0] = Preprocessor([review[0]]).preprocess()[0]
         preprocessed_documents.append(movie)
 
     index = Index(preprocessed_documents)
