@@ -1,8 +1,8 @@
 {
     "average_document_length": {
-        "stars": 2.9958071278825997,
-        "genres": 2.5786163522012577,
-        "summaries": 3.560796645702306
+        "stars": 3.0,
+        "genres": 2.621706235324811,
+        "summaries": 3.5230889642577616
     },
-    "document_count": 954
+    "document_count": 3833
 }
