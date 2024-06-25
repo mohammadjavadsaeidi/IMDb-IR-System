@@ -44,6 +44,9 @@ def search(
         weights: list = [0.3, 0.3, 0.4],
         should_print=False,
         preferred_genre: str = None,
+        smoothing_method=None,
+        alpha=0.5,
+        lamda=0.5,
 ):
     """
     Finds relevant documents to query
@@ -73,7 +76,8 @@ def search(
     list
     Retrieved documents with snippet
     """
-    weights_dic = {index: weight for index, weight in zip(['stars', 'genres', 'summaries'], weights)}
+    weights_dic = {index: weight for index, weight in zip([Indexes.STARS, Indexes.GENRES, Indexes.SUMMARIES], weights)}
+
     return search_engine.search(
         query, method, weights_dic, max_results=max_result_count, safe_ranking=True
     )
@@ -137,3 +141,12 @@ def clean_text(text: str) -> str:
     preprocessor = Preprocessor([text])
     cleaned_text = preprocessor.preprocess()
     return cleaned_text
+
+
+if __name__ == '__main__':
+    print(get_movie_by_id('tt0071562', movies_dataset))
+    # list_docs = []
+    # for i in list(movies_dataset.values()):
+    #     list_docs.append(i['title'] + ' ' + i['first_page_summary'])
+    #
+    # print(correct_text('spder ma', list_docs))

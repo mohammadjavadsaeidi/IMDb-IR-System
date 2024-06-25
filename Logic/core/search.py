@@ -41,15 +41,15 @@ class SearchEngine:
         )
 
     def search(
-        self,
-        query,
-        method,
-        weights,
-        safe_ranking=True,
-        max_results=10,
-        smoothing_method=None,
-        alpha=0.5,
-        lamda=0.5,
+            self,
+            query,
+            method,
+            weights,
+            safe_ranking=True,
+            max_results=10,
+            smoothing_method=None,
+            alpha=0.5,
+            lamda=0.5,
     ):
         """
         searches for the query in the indexes.
@@ -164,11 +164,11 @@ class SearchEngine:
         """
 
         for field in weights:
-            scorer = Scorer(self.document_indexes[field].index,3833)
+            scorer = Scorer(self.document_indexes[field].index, 3833)
             scores[field] = scorer.compute_scores_with_vector_space_model(query, method)
 
     def find_scores_with_unigram_model(
-        self, query, smoothing_method, weights, scores, alpha=0.5, lamda=0.5
+            self, query, smoothing_method, weights, scores, alpha=0.5, lamda=0.5
     ):
         """
         Calculates the scores for each document based on the unigram model.
@@ -195,7 +195,8 @@ class SearchEngine:
 
             document_lengths = self.document_lengths_index[field].get_index()
             scorer = Scorer(self.document_indexes[field].get_index(), len(document_lengths))
-            scores[field] = scorer.compute_scores_with_unigram_model(query, smoothing_method, document_lengths, alpha, lamda)
+            scores[field] = scorer.compute_scores_with_unigram_model(query, smoothing_method, document_lengths, alpha,
+                                                                     lamda)
         return scores
 
     def merge_scores(self, scores1, scores2):

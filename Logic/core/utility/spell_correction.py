@@ -28,8 +28,7 @@ class SpellCorrection:
         """
         shingles = set()
         for i in range(len(word) - k + 1):
-            shingle = word[i:i + k]
-            shingles.add(shingle)
+            shingles.add(word[i:i + k])
         return shingles
 
     def jaccard_score(self, first_set, second_set):
@@ -68,14 +67,19 @@ class SpellCorrection:
         word_counter : dict
             A dictionary from words to their TFs.
         """
-        all_shingled_words = {}
-        word_counter = {}
+        all_shingled_words = dict()
+        word_counter = dict()
+
         for document in all_documents:
             words = document.split()
             for word in words:
-                shingles = self.shingle_word(word)
-                all_shingled_words[word] = shingles
-                word_counter[word] = word_counter.get(word, 0) + 1
+                word_lower = word.lower()
+                if word_lower not in all_shingled_words:
+                    all_shingled_words[word_lower] = self.shingle_word(word_lower)
+                if word_lower not in word_counter:
+                    word_counter[word_lower] = 0
+                word_counter[word_lower] += 1
+
         return all_shingled_words, word_counter
 
     def find_nearest_words(self, word):
@@ -92,16 +96,26 @@ class SpellCorrection:
         list of str
             5 nearest words.
         """
-        top5_candidates = []
-        shingles = self.shingle_word(word)
-        max_tf = max(self.word_counter.values())
-        for candidate, candidate_shingles in self.all_shingled_words.items():
-            score = self.jaccard_score(shingles, candidate_shingles)
-            tf_normalized = self.word_counter.get(candidate, 0) / max_tf
-            weighted_score = score * tf_normalized
-            top5_candidates.append((candidate, weighted_score))
-        top5_candidates.sort(key=lambda x: x[1], reverse=True)
-        return [candidate[0] for candidate in top5_candidates[:5]]
+        word_shingles = self.shingle_word(word.lower())
+        candidate_scores = []
+
+        for candidate_word, candidate_shingles in self.all_shingled_words.items():
+            jaccard = self.jaccard_score(word_shingles, candidate_shingles)
+            candidate_scores.append((candidate_word, jaccard))
+
+        candidate_scores = sorted(candidate_scores, key=lambda x: x[1], reverse=True)[:5]
+        max_tf = max(
+            [self.word_counter[candidate[0]] for candidate in candidate_scores if candidate[0] in self.word_counter])
+
+        ranked_candidates = []
+        for candidate, jaccard in candidate_scores:
+            if candidate in self.word_counter:
+                normalized_tf = self.word_counter[candidate] / max_tf
+                combined_score = jaccard * normalized_tf
+                ranked_candidates.append((candidate, combined_score))
+
+        ranked_candidates = sorted(ranked_candidates, key=lambda x: x[1], reverse=True)
+        return [candidate[0] for candidate in ranked_candidates]
 
     def spell_check(self, query):
         """
@@ -117,16 +131,17 @@ class SpellCorrection:
         str
             Correct form of the query.
         """
-        final_result = ""
-        words = query.split()
-        for word in words:
-            corrected_word = self.find_nearest_words(word)
-            final_result += corrected_word[0] if corrected_word else word
-            final_result += " "
-        return final_result.strip()
+        corrected_words = []
+        for word in query.split():
+            nearest_words = self.find_nearest_words(word)
+            corrected_words.append(nearest_words[0] if nearest_words else word)
+        return ' '.join(corrected_words)
 
 
-if __name__ == "__main__":
+
+if __name__ == '__main__':
+
+    # Example usage
     documents = [
         "The quick brown fox jumps over the lazy dog",
         "A brown dog chased a white cat",
@@ -134,8 +149,4 @@ if __name__ == "__main__":
     ]
 
     spell_corrector = SpellCorrection(documents)
-
-    misspelled_query = "quik broen foxx"
-    corrected_query = spell_corrector.spell_check(misspelled_query)
-    print("Misspelled Query:", misspelled_query)
-    print("Corrected Query:", corrected_query)
+    print(spell_corrector.spell_check("quck bron fox"))

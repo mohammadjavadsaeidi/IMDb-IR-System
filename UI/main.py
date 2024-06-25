@@ -1,7 +1,11 @@
 import streamlit as st
 import sys
+import os
 
-sys.path.append("../")
+current_dir = os.path.dirname(os.path.abspath(__file__))
+root_dir = os.path.abspath(os.path.join(current_dir, '..'))
+sys.path.append(root_dir)
+
 from Logic import utils
 import time
 from enum import Enum
@@ -26,7 +30,7 @@ class color(Enum):
 
 
 def get_top_x_movies_by_rank(x: int, results: list):
-    path = "../Logic/core/index/"  # Link to the index folder
+    path = "/Users/snapp/PycharmProjects/IMDb-IR-System/Logic/core/indexer/index.json"  # Link to the index folder
     document_index = Index_reader(path, Indexes.DOCUMENTS)
     corpus = []
     root_set = []
@@ -35,8 +39,8 @@ def get_top_x_movies_by_rank(x: int, results: list):
         stars = movie_detail["stars"]
         corpus.append({"id": movie_id, "title": movie_title, "stars": stars})
 
-    for element in results:
-        movie_id = element[0]
+    for element in corpus:
+        movie_id = element['id']
         movie_detail = document_index.index[movie_id]
         movie_title = movie_detail["title"]
         stars = movie_detail["stars"]
@@ -44,7 +48,13 @@ def get_top_x_movies_by_rank(x: int, results: list):
     analyzer = LinkAnalyzer(root_set=root_set)
     analyzer.expand_graph(corpus=corpus)
     actors, movies = analyzer.hits(max_result=x)
-    return actors, movies
+
+    movie_ids = []
+    for element in corpus:
+        for top_movie in movies:
+            if element['title'] == top_movie:
+                movie_ids.append(element['id'])
+    return actors, movie_ids
 
 
 def get_summary_with_snippet(movie_info, query):
@@ -132,7 +142,11 @@ def search_handling(
         return
 
     if search_button:
-        corrected_query = utils.correct_text(search_term, utils.movies_dataset)
+        list_docs = []
+        for i in list(utils.movies_dataset.values()):
+            list_docs.append(i['title'] + ' ' + i['first_page_summary'])
+
+        corrected_query = utils.correct_text(search_term, list_docs)
 
         if corrected_query != search_term:
             st.warning(f"Your search terms were corrected to: {corrected_query}")
@@ -146,7 +160,7 @@ def search_handling(
                 search_max_num,
                 search_method,
                 search_weights,
-                smoothing_method = unigram_smoothing,
+                smoothing_method=unigram_smoothing,
                 alpha=alpha,
                 lamda=lamda,
             )
@@ -173,26 +187,29 @@ def search_handling(
                 )
 
             with st.container():
-                st.markdown("**Directors:**")
-                num_authors = len(info["directors"])
-                for j in range(num_authors):
-                    st.text(info["directors"][j])
+                if info["directors"] is not None:
+                    st.markdown("**Directors:**")
+                    num_authors = len(info["directors"])
+                    for j in range(num_authors):
+                        st.text(info["directors"][j])
 
             with st.container():
-                st.markdown("**Stars:**")
-                num_authors = len(info["stars"])
-                stars = "".join(star + ", " for star in info["stars"])
-                st.text(stars[:-2])
+                if info["stars"] is not None:
+                    st.markdown("**Stars:**")
+                    num_authors = len(info["stars"])
+                    stars = "".join(star + ", " for star in info["stars"])
+                    st.text(stars[:-2])
 
                 topic_card = st.columns(1)
                 with topic_card[0].container():
-                    st.write("Genres:")
-                    num_topics = len(info["genres"])
-                    for j in range(num_topics):
-                        st.markdown(
-                            f"<span style='color:{random.choice(list(color)).value}'>{info['genres'][j]}</span>",
-                            unsafe_allow_html=True,
-                        )
+                    if info["genres"] is not None:
+                        st.write("Genres:")
+                        num_topics = len(info["genres"])
+                        for j in range(num_topics):
+                            st.markdown(
+                                f"<span style='color:{random.choice(list(color)).value}'>{info['genres'][j]}</span>",
+                                unsafe_allow_html=True,
+                            )
             with card[1].container():
                 st.image(info["Image_URL"], use_column_width=True)
 
