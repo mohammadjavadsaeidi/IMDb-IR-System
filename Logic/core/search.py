@@ -226,8 +226,8 @@ class SearchEngine:
 
 if __name__ == '__main__':
     search_engine = SearchEngine()
-    query = "spider man in wonderland"
-    method = "lnc.ltc"
+    query = "spider-man"
+    method = "unigram"
     weights = {
         Indexes.STARS: 1,
         Indexes.GENRES: 1,

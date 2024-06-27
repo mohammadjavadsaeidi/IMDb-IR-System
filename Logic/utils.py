@@ -40,8 +40,8 @@ def correct_text(text: str, all_documents: List[str]) -> str:
 def search(
         query: str,
         max_result_count: int,
-        method: str = "ltn-lnn",
-        weights: list = [0.3, 0.3, 0.4],
+        method: str,
+        weights: list,
         should_print=False,
         preferred_genre: str = None,
         smoothing_method=None,
@@ -77,9 +77,8 @@ def search(
     Retrieved documents with snippet
     """
     weights_dic = {index: weight for index, weight in zip([Indexes.STARS, Indexes.GENRES, Indexes.SUMMARIES], weights)}
-
     return search_engine.search(
-        query, method, weights_dic, max_results=max_result_count, safe_ranking=True
+        query, method, weights_dic, max_results=max_result_count, safe_ranking=True, smoothing_method=smoothing_method, alpha=alpha, lamda=lamda
     )
 
 

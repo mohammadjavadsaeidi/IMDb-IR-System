@@ -225,7 +225,7 @@ class Scorer:
         return score
 
     def compute_scores_with_unigram_model(
-            self, query, smoothing_method, document_lengths=None, alpha=0.5, lamda=0.5
+            self, query, smoothing_method, document_lengths, alpha=0.5, lamda=0.5
     ):
         """
         Calculates the scores for each document based on the unigram model.
